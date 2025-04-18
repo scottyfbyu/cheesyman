@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Click Click Supreme</title>
+  <style id="theme-style">
+    body {
+      font-family: 'Comic Sans MS', cursive;
+      background: #ccccff;
+      text-align: center;
+      padding: 50px;
+      color: #333;
+      overflow-x: hidden;
+      transition: background 1s ease;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+    }
+
+    #score {
+      font-size: 2rem;
+      margin: 20px 0;
+    }
+
+    #clickIcon {
+      font-size: 5rem;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.1s ease;
+      display: inline-block;
+    }
+
+    #clickIcon.clicked {
+      animation: wiggle 0.2s ease;
+    }
+
+    @keyframes wiggle {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(-10deg); }
+      50% { transform: rotate(10deg); }
+      75% { transform: rotate(-5deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    button {
+      font-size: 1.1rem;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin: 10px;
+    }
+
+    #buyClicker {
+      background-color: #ffcc00;
+    }
+
+    #buyClicker:disabled {
+      background-color: #ddd;
+      cursor: not-allowed;
+    }
+
+    #clickers {
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+
+    .chicken {
+      position: fixed;
+      font-size: 2rem;
+      animation: fall 2s linear forwards;
+      z-index: 1000;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(-100px); opacity: 1; }
+      100% { transform: translateY(100vh); opacity: 0; }
+    }
+
+    .theme-shop {
+      margin-top: 40px;
+    }
+
+    .theme-button {
+      background-color: #ffffff;
+      border: 2px solid #aaa;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 1rem;
+      margin: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="gameTitle">🥚 Click Click Supreme 🥚</h1>
+  <div id="score">Score: 0</div>
+  <div id="clickIcon" onclick="increment()">🐣</div>
+  <br>
+  <button id="buyClicker" onclick="buyClicker()">Buy Auto Clicker (50 pts)</button>
+  <div id="clickers">Auto Clickers: 0</div>
+
+  <div class="theme-shop">
+    <h2>🎨 Unlock Themes</h2>
+    <button class="theme-button" onclick="buyTheme('periwinkle', '#d4c8f7', 'Comic Sans MS', '🐣', '🥚 Click Click Supreme 🥚', 0)">Periwinkle (Free)</button>
+    <button class="theme-button" onclick="buyTheme('candyland', 'linear-gradient(45deg, #ff9a9e, #fecfef)', 'Poppins', '🍭', '🍭 Candyland Click 🍭', 400)">Candyland 🍭 (400 pts)</button>
+    <button class="theme-button" onclick="buyTheme('neon', 'linear-gradient(45deg, #f0ff00, #00ffab)', 'Press Start 2P', '💡', '💡 Neon Lights 💡', 500)">Neon Lights 💡 (500 pts)</button>
+    <button class="theme-button" onclick="buyTheme('sunset', 'linear-gradient(45deg, #ff6f61, #ff9e5f)', 'Rock Salt', '🌅', '🌅 Sunset Vibes 🌅', 600)">Sunset 🌅 (600 pts)</button>
+    <button class="theme-button" onclick="buyTheme('bubblegum', 'linear-gradient(45deg, #ffb6c1, #ff69b4)', 'Bangers', '🍬', '🍬 Bubblegum Bash 🍬', 700)">Bubblegum 🍬 (700 pts)</button>
+    <button class="theme-button" onclick="buyTheme('rainbow', 'linear-gradient(45deg, #ff5e62, #ffb7b0)', 'Lobster', '🌈', '🌈 Rainbow Rush 🌈', 800)">Rainbow Rush 🌈 (800 pts)</button>
+    <button class="theme-button" onclick="buyTheme('starry', 'linear-gradient(45deg, #1a003d, #4e0084)', 'Orbitron', '✨', '✨ Starry Night ✨', 900)">Starry Night ✨ (900 pts)</button>
+    <button class="theme-button" onclick="buyTheme('tropical', 'linear-gradient(45deg, #ff6347, #ffde4a)', 'Caveat Brush', '🍍', '🍍 Tropical Paradise 🍍', 1000)">Tropical 🍍 (1000 pts)</button>
+    <button class="theme-button" onclick="buyTheme('halloween', 'linear-gradient(45deg, #ff8800, #ff4400)', 'Rock Salt', '🎃', '🎃 Spooky Click 🎃', 1100)">Halloween 🎃 (1100 pts)</button>
+    <button class="theme-button" onclick="buyTheme('retro', 'linear-gradient(45deg, #f3f3f3, #e2c3f7)', 'Press Start 2P', '🎮', '🎮 Retro Arcade 🎮', 1200)">Retro Arcade 🎮 (1200 pts)</button>
+  </div>
+
+  <script>
+    let score = 0;
+    let clickers = 0;
+    let clickEnabled = true;
+    const maxClickers = 50;
+    const unlockedThemes = { periwinkle: true };
+
+    const scoreDisplay = document.getElementById('score');
+    const clickersDisplay = document.getElementById('clickers');
+    const buyButton = document.getElementById('buyClicker');
+    const egg = document.getElementById('clickIcon');
+    const body = document.body;
+    const gameTitle = document.getElementById('gameTitle');
+    const clickSound = new Audio('https://www.soundjay.com/button/beep-07.wav'); // Example SFX for clicking
+    const themeChangeSound = new Audio('https://www.soundjay.com/button/sounds/button-4.mp3'); // Theme change sound
+
+    function increment() {
+      if (!clickEnabled) return;
+      score++;
+      playSound(clickSound);
+      animateEgg();
+      spawnChicken();
+      updateUI();
+    }
+
+    function buyClicker() {
+      if (score >= 50 && clickers < maxClickers) {
+        score -= 50;
+        clickers++;
+        updateUI();
+      }
+    }
+
+    function buyTheme(name, bg, font, icon, title, cost) {
+      if (unlockedThemes[name]) {
+        setTheme(bg, font, icon, title);
+      } else if (score >= cost) {
+        score -= cost;
+        unlockedThemes[name] = true;
+        setTheme(bg, font, icon, title);
+        updateUI();
+        playSound(themeChangeSound);
+      } else {
+        alert("Not enough points to unlock this theme!");
+      }
+    }
+
+    function setTheme(bg, font, icon, title) {
+      body.style.background = bg;
+      body.style.fontFamily = font;
+      egg.textContent = icon;
+      gameTitle.textContent = title;
+    }
+
+    function playSound(sound) {
+      sound.play();
+    }
+
+    function updateUI() {
+      scoreDisplay.textContent = `Score: ${Math.floor(score)}`;
+      clickersDisplay.textContent = `Auto Clickers: ${clickers}`;
+      buyButton.disabled = score < 50 || clickers >= maxClickers;
+    }
+
+    setInterval(() => {
+      score += clickers;
+      updateUI();
+    }, 1000);
+
+    function animateEgg() {
+      egg.classList.add('clicked');
+      setTimeout(() => egg.classList.remove('clicked'), 200);
+    }
+
+    function spawnChicken() {
+      const chicken = document.createElement('div');
+      chicken.className = 'chicken';
+      chicken.style.left = Math.random() * window.innerWidth + 'px';
+      chicken.textContent = '🐔';
+      document.body.appendChild(chicken);
+      setTimeout(() => chicken.remove(), 2000);
+    }
+
+    updateUI();
+  </script>
+  <a href ="scratch.html">To Music Page</a><br>
+  <a href="index.html">To Resume</a>
+</body>
+</html>
